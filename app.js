@@ -125,15 +125,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const interventionForm = document.createElement("form");
         const dateInput = document.createElement("input");
         dateInput.setAttribute("type", "date");
-        dateInput.classList.add("mr-2");
-        const addButton = document.createElement("button");
-        addButton.textContent = "+";
-        addButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
-        // Désactiver à nouveau le bouton "Ajouter"
-        addButton.setAttribute("hidden", true);
+        dateInput.classList.add("mr-2", "hidden");
+        const addDateButton = document.createElement("button");
+        addDateButton.textContent = "+";
+        addDateButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
+        const validateButton = document.createElement("button");
+        validateButton.textContent = "Valider l'Ajout";
+        validateButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer", "hidden");
+
+        addDateButton.addEventListener("click", () => {
+            // Cacher le bouton "Ajouter une date"
+            addDateButton.classList.add("hidden");
+
+            // Afficher l'input
+            dateInput.classList.remove("hidden");
+
+            // Désactiver le bouton "Ajouter une date" pour éviter de cliquer pendant que l'input est visible
+            addDateButton.setAttribute("disabled", true);
+
+        });
+
         dateInput.addEventListener("input", () => {
             // Activer le bouton "Ajouter" uniquement si le champ de saisie n'est pas vide
-            addButton.hidden = !dateInput.value;
+            validateButton.hidden = !dateInput.value;
+            // Afficher le bouton "Valider"
+            validateButton.classList.remove("hidden");
         });
 
         // Créer une liste pour afficher les interventions
@@ -143,12 +159,20 @@ document.addEventListener("DOMContentLoaded", () => {
         addInitialDatesToForm(client.interventions, interventionsList);
 
         // Ajouter un événement au clic sur le bouton "Ajouter"
-        addButton.addEventListener("click", (event) => {
+        validateButton.addEventListener("click", (event) => {
             event.preventDefault();
 
             // Vous pouvez ajouter ici la logique pour gérer l'ajout de dates d'intervention
             const interventionDate = dateInput.value;
+            dateInput.classList.add("hidden");
+            // Afficher le bouton "Ajouter une date"
+            addDateButton.classList.remove("hidden");
 
+            // Cacher le bouton "Valider"
+            validateButton.classList.add("hidden");
+
+            // Réactiver le bouton "Ajouter une date"
+            addDateButton.removeAttribute("disabled");
 
             if (interventionDate) {
                 // Récupérer l'ID du client actuel au moment de l'ajout de la date
@@ -164,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Réinitialiser la date en input sur la date actuelle
                     dateInput.value = "";
-                    addButton.hidden = !dateInput.value;
+                    validateButton.hidden = !dateInput.value;
                 }
                 else {
                     alert("la date existe déjà");
@@ -173,8 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        interventionForm.appendChild(addDateButton);
         interventionForm.appendChild(dateInput);
-        interventionForm.appendChild(addButton);
+        interventionForm.appendChild(validateButton);
 
         // Ajouter la liste d'interventions au formulaire
         interventionForm.appendChild(interventionsList);
@@ -196,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const validationCell = document.createElement("td");
         const validateButton = document.createElement("button");
-        validateButton.textContent = "Valider";
+        validateButton.textContent = "Sauvegarder";
         validateButton.classList.add("bg-green-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
 
         // Ajouter un événement au clic sur le bouton "Valider"
