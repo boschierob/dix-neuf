@@ -20,25 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, nom: "Client 3", email: "client3@example.com" },
     ]
 
-    // Fonction pour trier les dates par ordre ascendant
-    function sortDates(interventionsList) {
-        const dates = Array.from(interventionsList.children)
-            .map((dateContainer) => dateContainer.querySelector("span").textContent);
-
-        // Trier les dates par ordre ascendant
-        dates.sort();
-
-        // Vider la liste actuelle des interventions
-        while (interventionsList.firstChild) {
-            interventionsList.removeChild(interventionsList.firstChild);
-        }
-
-        // Réajouter les dates triées à la liste
-        dates.forEach((date) => {
-            const interventionItem = createInterventionItem(date, interventionsList);
-            interventionsList.appendChild(interventionItem);
-        });
-    }
+    
     /*
         // Fonction pour obtenir la date actuelle au format "YYYY-MM-DD"
         function getCurrentDate() {
@@ -50,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         */
 
+        
     // Fonction pour créer un élément li pour une intervention
     function createInterventionItem(interventionDate, interventionsList) {
         const newInterventionItem = document.createElement("li");
@@ -65,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Ajouter le bouton de suppression
         const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Supprimer";
+        deleteButton.textContent = "X";
         deleteButton.classList.add("bg-red-500", "text-white", "px-2", "py-1", "rounded", "ml-2", "cursor-pointer");
 
         // Ajouter un événement au clic sur le bouton de suppression
@@ -76,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         interventionContainer.appendChild(deleteButton);
         newInterventionItem.appendChild(interventionContainer);
+        
 
         return newInterventionItem;
     }
@@ -94,9 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Réajouter les dates triées à la liste
-        dates.forEach((date) => {
+        dates.forEach((date, index) => {
             const interventionItem = createInterventionItem(date, interventionsList);
             interventionsList.appendChild(interventionItem);
+            
         });
     }
 
@@ -121,14 +106,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const idCell = document.createElement("td");
         idCell.textContent = client.id;
         row.appendChild(idCell);
+        
 
         const nomCell = document.createElement("td");
         nomCell.textContent = client.nom;
         row.appendChild(nomCell);
 
-        const emailCell = document.createElement("td");
+       /* const emailCell = document.createElement("td");
         emailCell.textContent = client.email;
-        row.appendChild(emailCell);
+        row.appendChild(emailCell);*/
 
         // Ajouter une colonne avec les interventions existantes et le formulaire pour ajouter de nouvelles interventions
         const interventionCell = document.createElement("td");
@@ -139,9 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
         dateInput.setAttribute("type", "date");
         dateInput.classList.add("mr-2");
         const addButton = document.createElement("button");
-        addButton.textContent = "Ajouter";
+        addButton.textContent = "+";
         addButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
-
+        // Désactiver à nouveau le bouton "Ajouter"
+        addButton.setAttribute("hidden", true);
+        dateInput.addEventListener("input", () => {
+            // Activer le bouton "Ajouter" uniquement si le champ de saisie n'est pas vide
+            addButton.hidden = !dateInput.value;
+        });
+    
         // Créer une liste pour afficher les interventions
         const interventionsList = document.createElement("ul");
 
@@ -163,7 +155,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 sortDates(interventionsList);
 
                 // Réinitialiser la date en input sur la date actuelle
-                dateInput.value = undefined;
+                dateInput.value = "";
+                addButton.hidden = !dateInput.value;
+
             }
         });
 
@@ -211,26 +205,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const clientsData = [];
 
         tableRows.forEach((row) => {
-            const id = row.querySelector("td:nth-child(1)").textContent;
-            const nom = row.querySelector("td:nth-child(2)").textContent;
-            const email = row.querySelector("td:nth-child(3)").textContent;
-
+            const idCell = row.querySelector("td:nth-child(1)");
+            const nomCell = row.querySelector("td:nth-child(2)");
             // Récupérer les interventions de la liste
             const interventionsList = row.querySelector("td form ul");
-            const interventions = Array.from(interventionsList.children)
-                .map((interventionContainer) => interventionContainer.querySelector("span").textContent);
 
-            clientsData.push({
-                id: id,
-                nom: nom,
-                email: email,
-                interventions: interventions,
-            });
+            if (idCell && nomCell && interventionsList) {
+                const id = idCell.textContent;
+                const nom = nomCell.textContent;
+    
+                // Récupérer les interventions de la liste
+                const interventions = Array.from(interventionsList.children)
+                    .map((interventionContainer) => interventionContainer.querySelector("span").textContent);
+    
+                clientsData.push({
+                    id: id,
+                    nom: nom,
+                    interventions: interventions,
+                });
+            }
         });
 
-        return clientsData;
+        return JSON.stringify(clientsData);
     }
 
+   
     clientsData.forEach(addClientRow);
     addValidationRow();
 
