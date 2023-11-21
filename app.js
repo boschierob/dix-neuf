@@ -20,7 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: 3, nom: "Client 3", email: "client3@example.com" },
     ]
 
-    
+    // Variable globale pour stocker l'ID du client actuel
+    let currentClientId = null;
+
     /*
         // Fonction pour obtenir la date actuelle au format "YYYY-MM-DD"
         function getCurrentDate() {
@@ -32,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         */
 
-        
+
     // Fonction pour créer un élément li pour une intervention
     function createInterventionItem(interventionDate, interventionsList) {
         const newInterventionItem = document.createElement("li");
@@ -59,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         interventionContainer.appendChild(deleteButton);
         newInterventionItem.appendChild(interventionContainer);
-        
+
 
         return newInterventionItem;
     }
@@ -81,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dates.forEach((date, index) => {
             const interventionItem = createInterventionItem(date, interventionsList);
             interventionsList.appendChild(interventionItem);
-            
+
         });
     }
 
@@ -106,15 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const idCell = document.createElement("td");
         idCell.textContent = client.id;
         row.appendChild(idCell);
-        
+
 
         const nomCell = document.createElement("td");
         nomCell.textContent = client.nom;
         row.appendChild(nomCell);
 
-       /* const emailCell = document.createElement("td");
-        emailCell.textContent = client.email;
-        row.appendChild(emailCell);*/
+        /* const emailCell = document.createElement("td");
+         emailCell.textContent = client.email;
+         row.appendChild(emailCell);*/
 
         // Ajouter une colonne avec les interventions existantes et le formulaire pour ajouter de nouvelles interventions
         const interventionCell = document.createElement("td");
@@ -133,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Activer le bouton "Ajouter" uniquement si le champ de saisie n'est pas vide
             addButton.hidden = !dateInput.value;
         });
-    
+
         // Créer une liste pour afficher les interventions
         const interventionsList = document.createElement("ul");
 
@@ -146,17 +148,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Vous pouvez ajouter ici la logique pour gérer l'ajout de dates d'intervention
             const interventionDate = dateInput.value;
+
+
             if (interventionDate) {
-                // Ajouter la nouvelle intervention à la liste
-                const newInterventionItem = createInterventionItem(interventionDate, interventionsList);
-                interventionsList.appendChild(newInterventionItem);
+                // Récupérer l'ID du client actuel au moment de l'ajout de la date
+                currentClientId = client.id;
+                //console.log(currentClientId);
+                if (!isDateAlreadyExists(currentClientId, interventionDate)) {
+                    // Ajouter la nouvelle intervention à la liste
+                    const newInterventionItem = createInterventionItem(interventionDate, interventionsList);
+                    interventionsList.appendChild(newInterventionItem);
 
-                // Trier les dates par ordre ascendant
-                sortDates(interventionsList);
+                    // Trier les dates par ordre ascendant
+                    sortDates(interventionsList);
 
-                // Réinitialiser la date en input sur la date actuelle
-                dateInput.value = "";
-                addButton.hidden = !dateInput.value;
+                    // Réinitialiser la date en input sur la date actuelle
+                    dateInput.value = "";
+                    addButton.hidden = !dateInput.value;
+                }
+                else {
+                    alert("la date existe déjà");
+                }
 
             }
         });
@@ -213,11 +225,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (idCell && nomCell && interventionsList) {
                 const id = idCell.textContent;
                 const nom = nomCell.textContent;
-    
+
                 // Récupérer les interventions de la liste
                 const interventions = Array.from(interventionsList.children)
                     .map((interventionContainer) => interventionContainer.querySelector("span").textContent);
-    
+
                 clientsData.push({
                     id: id,
                     nom: nom,
@@ -229,7 +241,35 @@ document.addEventListener("DOMContentLoaded", () => {
         return JSON.stringify(clientsData);
     }
 
-   
+
+    // Fonction pour vérifier si une date existe déjà pour un client
+    function isDateAlreadyExists(clientId, newDate) {
+
+        const tableRows = document.querySelectorAll("#clientsTable tbody tr");
+
+
+        for (const row of tableRows) {
+            const idCell = row.querySelector("td:nth-child(1)");
+            const interventionsList = row.querySelector("td form ul");
+
+            if (idCell && interventionsList) {
+                const id = parseInt(idCell.textContent);
+
+                if (id === clientId) {
+
+                    // Récupérer les dates existantes
+                    const existingDates = Array.from(interventionsList.children)
+                        .map((interventionContainer) => interventionContainer.querySelector("span").textContent);
+                    // Vérifier si la nouvelle date existe déjà
+                    if (existingDates.includes(newDate)) {
+                        return true; // La date existe déjà
+                    }
+                }
+            }
+        }
+
+        return false; // La date n'existe pas encore
+    }
     clientsData.forEach(addClientRow);
     addValidationRow();
 
