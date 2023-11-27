@@ -4,26 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="sign.css">
     <title>Tableau de Clients</title>
 </head>
 
-<body >
-    <div class="container mx-auto my-8">
-        <h1 class="text-2xl font-bold mb-4">Tableau de Clients</h1>
-        <table id="clientsTable" class="min-w-full bg-white border border-gray-300 shadow">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="py-2 px-4 border-b">ID</th>
-                    <th class="py-2 px-4 border-b">Nom</th>
-                    <th class="py-2 px-4 border-b">Interventions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Les données du tableau seront ajoutées dynamiquement ici avec JavaScript -->
-            </tbody>
-        </table>
+<body class="bg-gray-100">
+    <div class="container mx-auto my-8 px-4 sm:px-8 lg:px-16 xl:px-20">
+        <h1 class="text-2xl font-bold mb-4" id="h1WithMonth">Liste des interventions effectuées </h1>
+        <div class="overflow-x-auto">
+            <table id="clientsTable"  class="min-w-full bg-white border border-slate-300 hover:border-indigo-300 shadow-lg rounded-lg overflow-hidden">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">Nom</th>
+                        <th class="py-2 px-4 border-b">Interventions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Les données du tableau seront ajoutées dynamiquement ici avec JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        <div class="overflow-x-auto">
+            <form class="signature-pad-form" action="#" method="POST">
+                <h1>Vérification et signature : </h1>
+                <p>Pour valider vos interventions, il est nécessaire de vérifier ce document et le signer.</p>
+                <p><b>Signature</b></p>
+                <canvas height="100" width="300" class="signature-pad"></canvas>
+                <p><a href="#" class="clear-button">Clear</a></p>
+                <button class="submit-button" type="submit">SUBMIT</button>
+              </form>
+        </div>
+        
     </div>
 
     <script src="app.js"></script>
+  <!--   <script src="sign.js"></script> -->
 </body>
 </html>
