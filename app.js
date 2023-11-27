@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     /*
+
     // Fonction pour charger les données depuis le backend
     async function fetchClientsData(employeeId) {
         // Code pour récupérer les données depuis le backend (à remplacer avec votre logique)
@@ -14,11 +16,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     */
+    const today = new Date();
+    const currentMonth = today.getMonth();
+
+    // Tableau des noms de mois
+    const currentMonthString = [
+        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+
+    const thisMonth = currentMonthString[currentMonth];
+
+    console.log("Le mois courant est : " + thisMonth);
+
+    const h1WithMonth = document.getElementById("h1WithMonth");
+    h1WithMonth.innerHTML = ` ${h1WithMonth.innerHTML} concernant le mois de ${thisMonth} `
+
     const clientsData = [
         { id: 1, nom: "Client 1", email: "client1@example.com", interventions: ["2023-12-03", "2025-12-25"] },
         { id: 2, nom: "Client 2", email: "client2@example.com" },
         { id: 3, nom: "Client 3", email: "client3@example.com" },
     ]
+    let signature = "";
+
+    let sheetData = {};
 
     // Variable globale pour stocker l'ID du client actuel
     let currentClientId = null;
@@ -108,11 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const idCell = document.createElement("td");
         idCell.textContent = client.id;
         row.appendChild(idCell);
+        idCell.classList.add("text-center", "border");
 
 
         const nomCell = document.createElement("td");
         nomCell.textContent = client.nom;
         row.appendChild(nomCell);
+        nomCell.classList.add("text-center", "border");
 
         /* const emailCell = document.createElement("td");
          emailCell.textContent = client.email;
@@ -120,15 +143,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Ajouter une colonne avec les interventions existantes et le formulaire pour ajouter de nouvelles interventions
         const interventionCell = document.createElement("td");
+        interventionCell.classList.add("text-center", "border");
+
 
         // Créer le formulaire pour ajouter de nouvelles interventions
+        // Définir la date minimale au début du mois précédent
+        const firstDayOfPreviousMonth = new Date();
+        firstDayOfPreviousMonth.setMonth(firstDayOfPreviousMonth.getMonth());
+        firstDayOfPreviousMonth.setDate(1);
+        const minDate = firstDayOfPreviousMonth.toISOString().slice(0, 10); // Format YYYY-MM-dd
+
+        // Définir la date maximale au début du mois actuel
+        const firstDayOfCurrentMonth = new Date();
+        firstDayOfCurrentMonth.setMonth(firstDayOfCurrentMonth.getMonth() + 1);
+        firstDayOfCurrentMonth.setDate(1);
+        const maxDate = firstDayOfCurrentMonth.toISOString().slice(0, 10); // Format YYYY-MM-dd
+
         const interventionForm = document.createElement("form");
+
         const dateInput = document.createElement("input");
         dateInput.setAttribute("type", "date");
+        dateInput.setAttribute("min", minDate);
+        dateInput.setAttribute("max", maxDate);
         dateInput.classList.add("mr-2", "hidden");
         const addDateButton = document.createElement("button");
         addDateButton.textContent = "+";
         addDateButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
+
         const validateButton = document.createElement("button");
         validateButton.textContent = "Valider l'Ajout";
         validateButton.classList.add("bg-blue-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer", "hidden");
@@ -210,31 +251,32 @@ document.addEventListener("DOMContentLoaded", () => {
         tableBody.appendChild(row);
     }
 
-    // Fonction pour ajouter une ligne de validation au tableau des clients
-    function addValidationRow() {
-        const tableBody = document.querySelector("#clientsTable tbody");
-        const row = document.createElement("tr");
-
-        const emptyCell = document.createElement("td");
-        emptyCell.colSpan = 3; // Fusionner les trois premières colonnes pour créer une cellule vide
-        row.appendChild(emptyCell);
-
-        const validationCell = document.createElement("td");
-        const validateButton = document.createElement("button");
-        validateButton.textContent = "Sauvegarder";
-        validateButton.classList.add("bg-green-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
-
-        // Ajouter un événement au clic sur le bouton "Valider"
-        validateButton.addEventListener("click", () => {
-            // Logique de validation, par exemple envoyer les données au backend
-            console.log("Données validées :", getClientData());
-        });
-
-        validationCell.appendChild(validateButton);
-        row.appendChild(validationCell);
-
-        tableBody.appendChild(row);
-    }
+    /*  // Fonction pour ajouter une ligne de validation au tableau des clients
+     function addValidationRow() {
+         const tableBody = document.querySelector("#clientsTable tbody");
+         const row = document.createElement("tr");
+ 
+         const emptyCell = document.createElement("td");
+         emptyCell.colSpan = 2; // Fusionner les trois premières colonnes pour créer une cellule vide
+         row.appendChild(emptyCell);
+ 
+         const validationCell = document.createElement("td");
+         const validateButton = document.createElement("button");
+         validateButton.textContent = "Sauvegarder";
+         validateButton.classList.add("bg-green-500", "text-white", "px-2", "py-1", "rounded", "cursor-pointer");
+ 
+         // Ajouter un événement au clic sur le bouton "Valider"
+         validateButton.addEventListener("click", () => {
+             // Logique de validation, par exemple envoyer les données au backend
+             sign()
+             console.log("Données validées :", getClientData());
+         });
+ 
+         validationCell.appendChild(validateButton);
+         row.appendChild(validationCell);
+ 
+         tableBody.appendChild(row);
+     } */
 
     // Fonction pour récupérer les données du tableau des clients
     function getClientData() {
@@ -260,10 +302,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     nom: nom,
                     interventions: interventions,
                 });
+
+                sheetData = {
+                    month: thisMonth,
+                    list: clientsData,
+                    signature: signature
+                }
             }
         });
 
-        return JSON.stringify(clientsData);
+        return JSON.stringify(sheetData);
     }
 
 
@@ -296,7 +344,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return false; // La date n'existe pas encore
     }
     clientsData.forEach(addClientRow);
-    addValidationRow();
+    // addValidationRow();
+
+
 
     /*
     // Charger les données pour un employé spécifique (remplacez "EMPLOYEE_ID" par l'ID réel de l'employé)
@@ -310,5 +360,74 @@ document.addEventListener("DOMContentLoaded", () => {
             addValidationRow();
         });
     */
+
+    //SIGN SECTION
+
+    console.log("start sign pad");
+    const canvas = document.querySelector('canvas');
+    const form = document.querySelector('.signature-pad-form');
+    const clearButton = document.querySelector('.clear-button');
+
+    const ctx = canvas.getContext('2d');
+
+    let writingMode = false;
+
+    const handlePointerDown = (event) => {
+        writingMode = true;
+        ctx.beginPath();
+        const [positionX, positionY] = getCursorPosition(event);
+        ctx.moveTo(positionX, positionY);
+    }
+
+    const handlePointerUp = () => {
+        writingMode = false;
+    }
+
+    const handlePointerMove = (event) => {
+        if (!writingMode) return
+        const [positionX, positionY] = getCursorPosition(event);
+        ctx.lineTo(positionX, positionY);
+        ctx.stroke();
+    }
+
+    const getCursorPosition = (event) => {
+        positionX = event.clientX - event.target.getBoundingClientRect().x;
+        positionY = event.clientY - event.target.getBoundingClientRect().y;
+        return [positionX, positionY];
+    }
+
+    canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    canvas.addEventListener('pointerup', handlePointerUp, { passive: true });
+    canvas.addEventListener('pointermove', handlePointerMove, { passive: true });
+
+
+    ctx.lineWidth = 3;
+    ctx.lineJoin = ctx.lineCap = 'round';
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const imageURL = canvas.toDataURL();
+        const image = document.createElement('img');
+        image.src = imageURL;
+        image.height = canvas.height;
+        image.width = canvas.width;
+        image.style.display = 'block';
+        form.appendChild(image);
+
+        signature = imageURL
+        sheetData = getClientData();
+        console.log("Données validées :", sheetData);
+        clearPad();
+    })
+
+    const clearPad = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    clearButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        clearPad();
+    })
+
+
 });
 
